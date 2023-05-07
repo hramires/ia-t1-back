@@ -12,11 +12,11 @@ public class ArvoreService {
     private static final String POSITIVE = "positive";
     private static final String NEGATIVE = "negative";
 
-    public void main(String[] args) {
+    public static void main(String[] args) {
         try {
             List<List<String>> data = readData(FILE_PATH);
             Node root = buildDecisionTree(data);
-            // Use the decision tree to make predictions
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -40,8 +40,8 @@ public class ArvoreService {
         return data;
     }
 
-    private Node buildDecisionTree(List<List<String>> data) {
-        // Base case: no data or all attributes are the same
+    private static Node buildDecisionTree(List<List<String>> data) {
+
         if (data.isEmpty() || allAttributesSame(data)) {
             String classLabel = getMajorityClassLabel(data);
             return new Node(-1, null, null, classLabel);
@@ -70,7 +70,7 @@ public class ArvoreService {
         return true;
     }
 
-    private String getMajorityClassLabel(List<List<String>> data) {
+    private static String getMajorityClassLabel(List<List<String>> data) {
         Map<String, Integer> classCounts = new HashMap<>();
         for (List<String> instance : data) {
             String classLabel = instance.get(instance.size() - 1);
@@ -87,7 +87,7 @@ public class ArvoreService {
         return majorityClassLabel;
     }
     
-    private int getBestAttributeIndex(List<List<String>> data) {
+    private static int getBestAttributeIndex(List<List<String>> data) {
         double maxInfoGain = Double.MIN_VALUE;
         int bestAttrIndex = -1;
     
@@ -102,7 +102,7 @@ public class ArvoreService {
         return bestAttrIndex;
     }
     
-    private double computeInformationGain(List<List<String>> data, int attrIndex) {
+    private static double computeInformationGain(List<List<String>> data, int attrIndex) {
         double entropyBefore = getEntropy(data);
     
         Map<String, List<List<String>>> subsets = getSubsets(data, attrIndex);
@@ -116,7 +116,7 @@ public class ArvoreService {
         return entropyBefore - entropyAfter;
     }
 
-    private List<String> getAttributeValues(List<List<String>> data, int attributeIndex) {
+    private static List<String> getAttributeValues(List<List<String>> data, int attributeIndex) {
         List<String> attributeValues = new ArrayList<>();
         for (List<String> instance : data) {
             String attributeValue = instance.get(attributeIndex);
@@ -127,7 +127,7 @@ public class ArvoreService {
         return attributeValues;
     }
     
-    private List<List<String>> getSubset(List<List<String>> data, int attributeIndex, String attributeValue) {
+    private static List<List<String>> getSubset(List<List<String>> data, int attributeIndex, String attributeValue) {
         List<List<String>> subset = new ArrayList<>();
         for (List<String> instance : data) {
             if (instance.get(attributeIndex).equals(attributeValue)) {
@@ -140,7 +140,7 @@ public class ArvoreService {
     }
     
     
-    private Map<String, List<List<String>>> getSubsets(List<List<String>> data, int bestAttrIndex) {
+    private static Map<String, List<List<String>>> getSubsets(List<List<String>> data, int bestAttrIndex) {
         Map<String, List<List<String>>> subsets = new HashMap<>();
     
         for (List<String> instance : data) {
@@ -158,7 +158,7 @@ public class ArvoreService {
         return subsets;
     }
     
-    private double getEntropy(List<List<String>> data) {
+    private static double getEntropy(List<List<String>> data) {
         if (data.isEmpty()) {
             return 0;
         }
@@ -181,30 +181,8 @@ public class ArvoreService {
     
         return -positiveRatio * log2(positiveRatio) - negativeRatio * log2(negativeRatio);
     }
-    
-    private String getMostFrequentValue(List<List<String>> data, int attrIndex) {
-        Map<String, Integer> valueCounts = new HashMap<>();
-    
-        for (List<String> instance : data) {
-            String attrValue = instance.get(attrIndex);
-            Integer count = valueCounts.get(attrValue);
-            valueCounts.put(attrValue, count == null ? 1 : count + 1);
-        }
-    
-        int maxCount = 0;
-        String mostFrequentValue = null;
-    
-        for (Map.Entry<String, Integer> entry : valueCounts.entrySet()) {
-            if (entry.getValue() > maxCount) {
-                maxCount = entry.getValue();
-                mostFrequentValue = entry.getKey();
-            }
-        }
-    
-        return mostFrequentValue;
-    }
 
-    private double log2(double num) {
+    private static double log2(double num) {
         return Math.log(num) / Math.log(2);
     }
 }
