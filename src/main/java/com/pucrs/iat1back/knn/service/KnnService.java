@@ -22,16 +22,18 @@ public class KnnService {
 
     public ResponseEntity<CalculoDTO> calcular(List<String> matriz) throws IOException {
 
+        dadosTreino = gerenciadorArquivoService.carregarArquivo("src/treino_balanceado.csv", 558);
+        dadosTeste = gerenciadorArquivoService.carregarArquivo("src/teste_balanceado.csv", 106);
+//        escreveDados(dadosTreino);
+//        escreveDados(dadosTeste);
+
         System.out.println("k ; acertos");
 
         for (int i = 0; i < 278; i++) {
-            dadosTreino = gerenciadorArquivoService.carregarArquivo("src/treino_balanceado.csv", 558);
-            dadosTeste = gerenciadorArquivoService.carregarArquivo("src/teste_balanceado.csv", 106);
-
             k = i;
             executaKnn();
 
-            System.out.print(i);
+            System.out.print(k);
         }
 
 
@@ -41,19 +43,19 @@ public class KnnService {
                         .build());
     }
 
-    private void escreveDados(int[][] dados) {
-        System.out.println("\n\n--------- DADOS TREINO ---------");
+    public static void escreveDados(double[][] dados) {
+        //System.out.println("\n\n--------- D A D O S ---------");
         System.out.println("    x1  x2  x3  x4  x5  x6  x7  x8  x9  classe");
         for (int i = 0; i < dados.length; i++) {
             System.out.print((i + 1) + " : ");
             for (int j = 0; j < dados[i].length; j++) {
-                System.out.print(dados[i][j] + "   ");
+                System.out.print(dados[i][j] + " ");
             }
             System.out.println();
         }
     }
 
-    public void executaKnn() {
+    private void executaKnn() {
         int acertos = 0;
         int colunaRespostaEuclidiana = 0;
         int colunaRespostaTreino = 1;
@@ -86,6 +88,7 @@ public class KnnService {
     }
 
     private void ordena(double[][] distancia) {
+        double[] aux;
         for (int i = 0; i < distancia.length - 1; i++) {
             for (int j = 0; j < distancia.length - 1 - i; j++) {
                 if (distancia[j][0] > distancia[j + 1][0]) {
@@ -105,21 +108,17 @@ public class KnnService {
     }
 
     private int moda(double[][] distancia) {
-        int cont, classe = -1, quant = 0;
-
+        int rotulo, cont, classe = -1, quant = 0;
         for (int c = 1; c <= 3; c++) {
             cont = 0;
-
             for (int i = 0; i < k; i++) {
                 if (distancia[i][1] == c) cont++;
             }
-
             if (cont > quant) {
                 quant = cont;
                 classe = c;
             }
         }
-
         return classe;
     }
 
