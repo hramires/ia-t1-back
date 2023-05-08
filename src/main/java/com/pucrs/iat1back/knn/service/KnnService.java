@@ -21,25 +21,43 @@ public class KnnService {
     private GerenciadorArquivoService gerenciadorArquivoService;
 
     public ResponseEntity<CalculoDTO> calcular(List<String> matriz) throws IOException {
-
-        dadosTreino = gerenciadorArquivoService.carregarArquivo("src/treino_balanceado.csv", 558);
-        dadosTeste = gerenciadorArquivoService.carregarArquivo("src/teste_balanceado.csv", 106);
-//        escreveDados(dadosTreino);
-//        escreveDados(dadosTeste);
+        StatusEnum status = null;
 
         System.out.println("k ; acertos");
+        boolean treinar = false;
 
-        for (int i = 0; i < 278; i++) {
-            k = i;
-            executaKnn();
+        if (treinar) {
+            dadosTreino = gerenciadorArquivoService.carregarArquivo("src/treino_balanceado.csv", 558);
+            dadosTeste = gerenciadorArquivoService.carregarArquivo("src/teste_balanceado.csv", 106);
 
-            System.out.print(k);
+            for (int i = 0; i < 278; i++) {
+                k = i;
+                executaKnnTreino();
+
+                System.out.print(k);
+            }
+        } else {
+            dadosTreino = gerenciadorArquivoService.carregarArquivo("src/treino_balanceado.csv", 558);
+
+            dadosTeste = new double[1][9];
+            dadosTeste[0] = new double[]{
+                    gerenciadorArquivoService.retornaReferencialPossibilidade(matriz.get(0)),
+                    gerenciadorArquivoService.retornaReferencialPossibilidade(matriz.get(1)),
+                    gerenciadorArquivoService.retornaReferencialPossibilidade(matriz.get(2)),
+                    gerenciadorArquivoService.retornaReferencialPossibilidade(matriz.get(3)),
+                    gerenciadorArquivoService.retornaReferencialPossibilidade(matriz.get(4)),
+                    gerenciadorArquivoService.retornaReferencialPossibilidade(matriz.get(6)),
+                    gerenciadorArquivoService.retornaReferencialPossibilidade(matriz.get(7)),
+                    gerenciadorArquivoService.retornaReferencialPossibilidade(matriz.get(8)),
+            };
+
+            k = 10;
+            status = executaKnnTeste();
         }
-
 
         return ResponseEntity.ok(
                 CalculoDTO.builder()
-                        .status(StatusEnum.CONTINUA)
+                        .status(status)
                         .build());
     }
 
@@ -55,7 +73,7 @@ public class KnnService {
         }
     }
 
-    private void executaKnn() {
+    private void executaKnnTreino() {
         int acertos = 0;
         int colunaRespostaEuclidiana = 0;
         int colunaRespostaTreino = 1;
@@ -77,6 +95,24 @@ public class KnnService {
         }
 
         System.out.println(" ; " + acertos);
+    }
+
+    private StatusEnum executaKnnTeste() {
+        int colunaRespostaEuclidiana = 0;
+        int colunaRespostaTreino = 1;
+        int colunaClasse = 9;
+        int linhaTeste = 0;
+
+        distancia = new double[dadosTreino.length][2];
+
+        for (int linhaTreino = 0; linhaTreino < dadosTreino.length; linhaTreino++) {
+            distancia[linhaTreino][colunaRespostaEuclidiana] = euclidiana(dadosTeste[linhaTeste], dadosTreino[linhaTreino]);
+            distancia[linhaTreino][colunaRespostaTreino] = dadosTreino[linhaTreino][colunaClasse];
+        }
+
+        ordena(distancia);
+
+        return gerenciadorArquivoService.numberToClass((int) distancia[0][0]);
     }
 
     private double euclidiana(double[] atual, double[] amostra) {

@@ -1,5 +1,6 @@
 package com.pucrs.iat1back.knn.service;
 
+import com.pucrs.iat1back.enumerator.StatusEnum;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -32,7 +33,7 @@ public class GerenciadorArquivoService {
             dadosTreino[i][7] = retornaReferencialPossibilidade(colunas[7]);
             dadosTreino[i][8] = retornaReferencialPossibilidade(colunas[8]);
 
-            dadosTreino[i][9] = retornaReferencialClasse(colunas[9]);
+            dadosTreino[i][9] = classToNumber(colunas[9]);
 
             line = br.readLine();
         }
@@ -45,17 +46,20 @@ public class GerenciadorArquivoService {
     public int retornaReferencialPossibilidade(String valor) {
         switch (valor) {
             case "x":
+            case "X":
                 return 1;
             case "o":
+            case "O":
                 return 2;
             case "b":
+            case "":
                 return 3;
             default:
                 return -1;
         }
     }
 
-    private int retornaReferencialClasse(String valor) {
+    public int classToNumber(String valor) {
         switch (valor) {
             case "positive_x":
                 return 1;
@@ -63,6 +67,17 @@ public class GerenciadorArquivoService {
                 return 0;
             default:
                 return -1;
+        }
+    }
+
+    public StatusEnum numberToClass(int valor) {
+        switch (valor) {
+            case 1:
+                return StatusEnum.POSITIVO_X;
+            case 0:
+                return StatusEnum.NEGATIVO_X;
+            default:
+                return StatusEnum.CONTINUA;
         }
     }
 
