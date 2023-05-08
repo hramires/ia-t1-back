@@ -1,4 +1,4 @@
-package com.pucrs.iat1back.service;
+package com.pucrs.iat1back.mlp.service;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ArvoreService {
-    private static final String FILE_PATH = "treino.txt";
+    private static final String FILE_PATH = "treino.csv";
     private static final String POSITIVE = "positive";
     private static final String NEGATIVE = "negative";
 

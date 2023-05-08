@@ -1,4 +1,4 @@
-package com.pucrs.iat1back.service;
+package com.pucrs.iat1back.knn.service;
 
 import org.springframework.stereotype.Service;
 
@@ -9,13 +9,12 @@ import java.io.IOException;
 @Service
 public class GerenciadorArquivoService {
 
-    public double[][] carregarArquivoTreino() throws IOException {
-        int qtdLinhas = 957;
+    public double[][] carregarArquivo(String nomeArquivo, int qtdLinhas) throws IOException {
         int qtdColunas = 10;
         double[][] dadosTreino = new double[qtdLinhas][qtdColunas];
 
-        BufferedReader br = new BufferedReader(new FileReader("src/treino.txt"));
-        br.readLine();
+        BufferedReader br = new BufferedReader(new FileReader(nomeArquivo));
+
         String line = br.readLine();
 
         for (int i = 0; i < qtdLinhas; i++) {
@@ -58,9 +57,9 @@ public class GerenciadorArquivoService {
 
     private int retornaReferencialClasse(String valor) {
         switch (valor) {
-            case "positive":
+            case "positive_x":
                 return 1;
-            case "negative":
+            case "negative_x":
                 return 0;
             default:
                 return -1;

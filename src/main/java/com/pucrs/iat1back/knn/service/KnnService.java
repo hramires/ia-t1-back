@@ -1,7 +1,6 @@
-package com.pucrs.iat1back.service;
+package com.pucrs.iat1back.knn.service;
 
 import com.pucrs.iat1back.dto.CalculoDTO;
-import com.pucrs.iat1back.dto.MatrizDTO;
 import com.pucrs.iat1back.enumerator.StatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,23 +20,20 @@ public class KnnService {
     @Autowired
     private GerenciadorArquivoService gerenciadorArquivoService;
 
-    public ResponseEntity<CalculoDTO> calcular(MatrizDTO matriz) throws IOException {
+    public ResponseEntity<CalculoDTO> calcular(List<String> matriz) throws IOException {
 
-        dadosTreino = gerenciadorArquivoService.carregarArquivoTreino();
-        //        escreveDados(dadosTreino);
+        System.out.println("k ; acertos");
 
-        dadosTeste = new double[1][9];
+        for (int i = 0; i < 278; i++) {
+            dadosTreino = gerenciadorArquivoService.carregarArquivo("src/treino_balanceado.csv", 558);
+            dadosTeste = gerenciadorArquivoService.carregarArquivo("src/teste_balanceado.csv", 106);
 
-        for (int i = 0; i < 9; i++) {
-            dadosTeste[0][i] = gerenciadorArquivoService.retornaReferencialPossibilidade(matriz.getMatriz().get(i));
+            k = i;
+            executaKnn();
+
+            System.out.print(i);
         }
 
-        executaKnn();
-
-
-        List<String> primeiraLinha = matriz.getMatriz().subList(0, 3);
-        List<String> segudnaLinha = matriz.getMatriz().subList(3, 6);
-        List<String> terceiraLinha = matriz.getMatriz().subList(6, 9);
 
         return ResponseEntity.ok(
                 CalculoDTO.builder()
@@ -59,22 +55,26 @@ public class KnnService {
 
     public void executaKnn() {
         int acertos = 0;
-        for (int i = 0; i < dadosTeste.length; i++) {
+        int colunaRespostaEuclidiana = 0;
+        int colunaRespostaTreino = 1;
+        int colunaClasse = 9;
+
+        for (int linhaTeste = 0; linhaTeste < dadosTeste.length; linhaTeste++) {
             distancia = new double[dadosTreino.length][2];
 
-            for (int j = 0; j < dadosTreino.length; j++) {
-                distancia[j][0] = euclidiana(dadosTeste[i], dadosTreino[j]);
-                distancia[j][1] = dadosTreino[j][4];
+            for (int linhaTreino = 0; linhaTreino < dadosTreino.length; linhaTreino++) {
+                distancia[linhaTreino][colunaRespostaEuclidiana] = euclidiana(dadosTeste[linhaTeste], dadosTreino[linhaTreino]);
+                distancia[linhaTreino][colunaRespostaTreino] = dadosTreino[linhaTreino][colunaClasse];
             }
 
-            //System.out.println("Antes");
-            //exibeDistancias(distancia);
             ordena(distancia);
-            //System.out.println("Depois");
-            //exibeDistancias(distancia);
-            System.out.println("Classe Predita:" + moda(distancia));
-            //break;
+
+            if (dadosTeste[linhaTeste][colunaClasse] == moda(distancia)) {
+                acertos++;
+            }
         }
+
+        System.out.println(" ; " + acertos);
     }
 
     private double euclidiana(double[] atual, double[] amostra) {

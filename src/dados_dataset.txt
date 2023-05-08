@@ -1,0 +1,11 @@
+positivo = 332
+negativo = 332
+total = 664
+
+80% para treino = 558
+positivos = 279 
+negativos = 279
+
+20% para teste = 106
+positivos = 53 
+negativos = 53
