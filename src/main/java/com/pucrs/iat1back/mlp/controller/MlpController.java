@@ -20,7 +20,9 @@ public class MlpController {
     private MlpService mlpService;
 
     @PostMapping("/calcular")
-    public ResponseEntity<CalculoDTO> calcularMlp(@RequestBody List<String> matriz) {
+    public ResponseEntity<CalculoDTO> calcularMlp(@RequestBody List<String> matriz) throws Exception {
+        System.out.println("matriz: " + matriz);
+
         return mlpService.calcular(matriz);
     }
 
