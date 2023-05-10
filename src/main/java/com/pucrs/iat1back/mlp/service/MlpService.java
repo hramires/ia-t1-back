@@ -3,6 +3,8 @@ package com.pucrs.iat1back.mlp.service;
 import com.pucrs.iat1back.dto.CalculoDTO;
 import com.pucrs.iat1back.enumerator.StatusEnum;
 
+import lombok.val;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +12,7 @@ import java.util.List;
 import java.io.File;
 
 import weka.classifiers.functions.MultilayerPerceptron;
+import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -25,18 +28,18 @@ public class MlpService {
         System.out.println("dentro do método calcular matriz: " + board);
     
         // Carrega o dataset de treino
-        String filePath = "C:\\Users\\leona\\Desktop\\ia-back2\\ia-t1-back-main\\src\\treino_balanceado_mlp.arff";
+        String filePath = "src/treino_balanceado_mlp.arff";
         ArffLoader loader = new ArffLoader();
         loader.setFile(new File(filePath));
         System.out.println("arquivo: " + loader);
     
         Instances instances = loader.getDataSet();
+
+        PrintDataSet(instances);
+
         instances.setClassIndex(instances.numAttributes() - 1);
-    
-        System.out.println("loader conseguiu buscar o dataset: " + loader + "\n");
-    
-        // seta classe de atributos
-        instances.setClassIndex(instances.numAttributes() - 1);
+
+        System.out.println("loader conseguiu buscar o dataset: " + loader.getClass() + "\n");
     
         // codificação nos atributos categóricos
         int[] categoricalIndices = {0, 1, 2, 3, 4, 5, 6, 7, 8};
@@ -49,9 +52,9 @@ public class MlpService {
     
         // treina o classificador MLP
         MultilayerPerceptron mlp = new MultilayerPerceptron();
-        mlp.setHiddenLayers("10");
-        mlp.setLearningRate(0.5);
-        mlp.setTrainingTime(2000);
+        mlp.setHiddenLayers("3,3,3");
+        mlp.setLearningRate(0.3);
+        mlp.setTrainingTime(500);
         mlp.buildClassifier(instances);
     
         // cria uma instância a partir do tabuleiro do jogo
@@ -63,14 +66,19 @@ public class MlpService {
         System.out.println("valor previsto pelo algoritmo: " + prediction + "\n");
 
         // retorna o resultado
-        StatusEnum status = prediction == 0.0 ? StatusEnum.CONTINUA : StatusEnum.ENCERRAR;
+        StatusEnum status = StatusEnum.ENCERRAR;
+        if(prediction == 0.0)
+            status = StatusEnum.POSITIVO_X;
+        if(prediction == 1.0)
+            status = StatusEnum.NEGATIVO_X;
+        if(prediction == 2.0)
+            status = StatusEnum.CONTINUA;
+
         return ResponseEntity.ok(
                 CalculoDTO.builder()
                         .status(status)
                         .build());
     }
-    
-    
 
     private Instance createInstanceFromBoard(List<String> board, Instances data) {
         Instance instance = new DenseInstance(data.numAttributes());
@@ -80,20 +88,37 @@ public class MlpService {
         int attributeIndex = 0;
         for (String cell : board) {
             switch (cell) {
-                case "x":
+                case "X":
+                    instance.setValue(attributeIndex, 0.0);
+                    break;
+                case "O":
                     instance.setValue(attributeIndex, 1.0);
                     break;
-                case "o":
-                    instance.setValue(attributeIndex, 2.0);
-                    break;
                 default:
-                    instance.setValue(attributeIndex, 0.0);
+                    instance.setValue(attributeIndex, 2.0);
             }
             attributeIndex++;
         }
     
         return instance;
-    }        
+    }       
+    
+    private void PrintDataSet(Instances instances){
+        if (instances == null) {
+            System.out.println("Falhou em carregar o arquivo ARFF");
+        } else {
+            System.out.println("Loaded " + instances.numInstances() + " instances from ARFF file");
+            for (int i = 0; i < instances.numInstances(); i++) {
+                Instance instance = instances.instance(i);
+                for (int j = 0; j < instances.numAttributes(); j++) {
+                    Attribute attribute = instances.attribute(j);
+                    double value = instance.value(j);
+                    System.out.println(attribute.name() + ": " + value);
+                }
+                System.out.println(); 
+            }
+        }
+    }
 }
 
 
