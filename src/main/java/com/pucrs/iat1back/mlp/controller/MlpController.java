@@ -26,4 +26,9 @@ public class MlpController {
         return mlpService.calcular(matriz);
     }
 
+    @PostMapping("/avaliar")
+    public ResponseEntity<String> avaliar() throws Exception {
+        return mlpService.avaliar();
+    }
+
 }
