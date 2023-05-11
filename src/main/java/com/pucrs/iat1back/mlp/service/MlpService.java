@@ -3,14 +3,13 @@ package com.pucrs.iat1back.mlp.service;
 import com.pucrs.iat1back.dto.CalculoDTO;
 import com.pucrs.iat1back.enumerator.StatusEnum;
 
-import lombok.val;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.io.File;
 
+import weka.classifiers.Evaluation;
 import weka.classifiers.functions.MultilayerPerceptron;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -35,7 +34,7 @@ public class MlpService {
     
         Instances instances = loader.getDataSet();
 
-        PrintDataSet(instances);
+        //PrintDataSet(instances);
 
         instances.setClassIndex(instances.numAttributes() - 1);
 
@@ -52,9 +51,9 @@ public class MlpService {
     
         // treina o classificador MLP
         MultilayerPerceptron mlp = new MultilayerPerceptron();
-        mlp.setHiddenLayers("3,3,3");
-        mlp.setLearningRate(0.3);
-        mlp.setTrainingTime(500);
+        mlp.setHiddenLayers("10,10,10");
+        mlp.setLearningRate(0.5);
+        mlp.setTrainingTime(1000);
         mlp.buildClassifier(instances);
     
         // cria uma instância a partir do tabuleiro do jogo
@@ -101,7 +100,55 @@ public class MlpService {
         }
     
         return instance;
-    }       
+    }  
+    
+    public ResponseEntity<String> avaliar() throws Exception {
+        // Carrega o dataset de teste
+        String filePath = "src/teste_balanceado_mlp.arff";
+        ArffLoader loader = new ArffLoader();
+        loader.setFile(new File(filePath));
+        Instances instances = loader.getDataSet();
+        instances.setClassIndex(instances.numAttributes() - 1);
+    
+        // codificação nos atributos categóricos
+        int[] categoricalIndices = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+        for (int i : categoricalIndices) {
+            StringToNominal filter = new StringToNominal();
+            filter.setAttributeRange(Integer.toString(i + 1));
+            filter.setInputFormat(instances);
+            instances = Filter.useFilter(instances, filter);
+        }
+    
+        // treina o classificador MLP
+        MultilayerPerceptron mlp = trainMlpModel(instances);
+    
+        // avalia o modelo
+        Evaluation eval = new Evaluation(instances);
+        eval.evaluateModel(mlp, instances);
+    
+        // obtém as métricas de avaliação do modelo
+        double accuracy = eval.pctCorrect();
+        double precision = eval.weightedPrecision();
+        double acertos = eval.correct();
+    
+        // formata a saída das métricas
+        String result = String.format("Acurácia do modelo: %.2f%%\n"
+                + "Precisão do modelo: %.2f\n"
+                + "Acertos do modelo: %.2f\n", accuracy, precision, acertos);
+    
+        return ResponseEntity.ok(result);
+    }
+    
+
+    private MultilayerPerceptron trainMlpModel(Instances instances) throws Exception {
+        // treina o classificador MLP
+        MultilayerPerceptron mlp = new MultilayerPerceptron();
+        mlp.setHiddenLayers("10,10,10");
+        mlp.setLearningRate(0.7);
+        mlp.setTrainingTime(700);
+        mlp.buildClassifier(instances);
+        return mlp;
+    }
     
     private void PrintDataSet(Instances instances){
         if (instances == null) {
